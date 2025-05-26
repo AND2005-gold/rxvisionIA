@@ -1,16 +1,63 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RXvision | AI Chest X-ray Diagnosis & Education</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RXvision - Diagnóstico por IA</title>
+  <link rel="stylesheet" href="dist/output.css">
+</head>
+<body class="bg-neutral-100 text-neutral-900 min-h-screen flex items-center justify-center px-4">
+
+  <div class="bg-white shadow-xl rounded-xl p-8 max-w-lg w-full space-y-6">
+    <h1 class="text-3xl font-bold text-center">RXvision - Diagnóstico de Neumonía</h1>
+
+    <form id="formulario" enctype="multipart/form-data" class="space-y-4">
+      <input 
+        type="file" 
+        id="imagen" 
+        name="imagen" 
+        accept="image/*" 
+        required 
+        class="input-field"
+      />
+      <button 
+        type="submit" 
+        class="btn-primary w-full"
+      >
+        Enviar imagen
+      </button>
+    </form>
+
+    <div id="resultado" class="text-center text-lg font-medium"></div>
+  </div>
+
+  <script>
+    const formulario = document.getElementById("formulario");
+    const resultadoDiv = document.getElementById("resultado");
+
+    formulario.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const archivo = document.getElementById("imagen").files[0];
+      const formData = new FormData();
+      formData.append("imagen", archivo);
+
+      try {
+        const respuesta = await fetch("http://127.0.0.1:5000/predecir", {
+          method: "POST",
+          body: formData
+        });
+
+        const datos = await respuesta.json();
+
+        if (respuesta.ok) {
+          resultadoDiv.innerHTML = `<p><strong>Diagnóstico:</strong> ${datos.resultado}</p>`;
+        } else {
+          resultadoDiv.innerHTML = `<p>Error: ${datos.error}</p>`;
+        }
+      } catch (err) {
+        resultadoDiv.innerHTML = "<p class='text-red-500'>Error al conectar con el servidor Flask.</p>";
+      }
+    });
+  </script>
+</body>
 </html>
